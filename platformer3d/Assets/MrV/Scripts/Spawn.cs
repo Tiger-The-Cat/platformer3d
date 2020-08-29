@@ -7,12 +7,19 @@ public class Spawn : MonoBehaviour
 	public GameObject thingToSpawn;
 
 	public KeyCode key = KeyCode.Mouse0;
+    public float fireRate = 0.1f;
+    public float time = 0;
 
     void Update()
     {
-		if (Input.GetKeyDown(key))
-		{
-			Instantiate(thingToSpawn, transform.position, transform.rotation);
+        time += Time.deltaTime;
+		if (Input.GetKey(key))
+           
+		{ if (time >= fireRate)
+            {
+                Instantiate(thingToSpawn, transform.position, transform.rotation);
+                time = 0;
+            }
 		}
     }
 }
