@@ -690,6 +690,10 @@ PrefabInstance:
       propertyPath: m_Constraints
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 11448940, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
+      propertyPath: key
+      value: 325
+      objectReference: {fileID: 0}
     - target: {fileID: 11451598, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
       propertyPath: joystickOutput.onHorizontalChange.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -705,6 +709,14 @@ PrefabInstance:
     - target: {fileID: 11451598, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
       propertyPath: joystickOutput.onVerticalChange.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: set_FaceY
+      objectReference: {fileID: 0}
+    - target: {fileID: 11477564, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
+      propertyPath: move.automaticMovement.jumpAtObstacle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11477564, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
+      propertyPath: move.automaticMovement.enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
@@ -759,7 +771,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thingToSpawn: {fileID: 1194605029589290790, guid: a4bea6a399d2cdf4bb8e7fb1adf645f7,
     type: 3}
-  key: 32
+  key: 323
 --- !u!1001 &1194605028382889987
 PrefabInstance:
   m_ObjectHideFlags: 0

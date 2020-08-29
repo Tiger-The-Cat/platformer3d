@@ -6,7 +6,7 @@ public class Spawn : MonoBehaviour
 {
 	public GameObject thingToSpawn;
 
-	public KeyCode key = KeyCode.Space;
+	public KeyCode key = KeyCode.Mouse0;
 
     void Update()
     {
