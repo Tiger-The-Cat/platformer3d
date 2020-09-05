@@ -1270,6 +1270,10 @@ PrefabInstance:
       propertyPath: jump.maxJumps
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 11477564, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
+      propertyPath: jump.maxJumpHeight
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d542b9fba148c245b1da48b5fd1ffb2, type: 3}
 --- !u!20 &1989836207 stripped
