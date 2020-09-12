@@ -13,7 +13,7 @@ public class moveBall : MonoBehaviour
     public float jumpHeight = 3f;
 
     public Transform groundCheck;
-    public float groundDistance = 0.4f;
+    public float groundDistance = 1.2f;
     public LayerMask groundMask;
 
     bool isGrounded;
@@ -33,11 +33,6 @@ public class moveBall : MonoBehaviour
         //free fall
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        if (isGrounded && velocity.y < 0)//check if on the ground and not jumping
-        {
-            velocity.y = 0f;//set to default
-        }
-
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);//equation to get the ideal velocity with ideal height
@@ -45,7 +40,23 @@ public class moveBall : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;//*deltaTime so the frame rate wont effect speed
 
-        transform.localPosition += velocity * Time.deltaTime;
+        if (isGrounded && velocity.y < 0)//check if on the ground and not jumping
+        {
+            velocity.y = 0f;//set to default
+        }
+
+        float howFarWeWantToFall = velocity.y * Time.deltaTime;
+        Ray r = new Ray(transform.position, Vector3.down);
+        RaycastHit rh = new RaycastHit();
+        if(Physics.Raycast(r, out rh, howFarWeWantToFall + 0.5f))
+        {
+          Debug.Log("we want to fall" + howFarWeWantToFall + ", but we can only fall" + rh.distance);
+        }else{
+          transform.localPosition += velocity * Time.deltaTime;
+        }
+
+
+
 
     }
 }
