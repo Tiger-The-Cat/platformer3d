@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Trigger_Obstacle : MonoBehaviour
 {
-    public GameObject player;
+ //   public GameObject player;
     public float moveHeight = 10;
     public float speed = 5;
     public bool ismoving;
@@ -29,13 +29,6 @@ public class Trigger_Obstacle : MonoBehaviour
             if (direction == Vector3.up && transform.position.y >= topY)
             {
                 direction = onPlatform ? Vector3.zero : Vector3.down;
-                if (!onPlatform)
-                {
-                    direction = Vector3.down;
-                }
-                else {
-                    direction = Vector3.zero;
-                }
             }
             if (direction == Vector3.down && transform.position.y <= bottomY)
             {
@@ -46,7 +39,7 @@ public class Trigger_Obstacle : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject == player) {
+        if (collision.gameObject.tag =="Player") {
             onPlatform = true;
             ismoving = true;
             direction = Vector3.up;
@@ -55,7 +48,7 @@ public class Trigger_Obstacle : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject == player) {
+        if (collision.gameObject.tag =="Player") {
             onPlatform = false;
             direction = Vector3.down;
         }
