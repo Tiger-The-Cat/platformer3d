@@ -1,12 +1,14 @@
 ﻿// http://codegiraffe.com/unity/NonStandardPlayer.unitypackage
+using NonStandard.Inputs;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace NonStandard {
+namespace NonStandard.Character {
 	[RequireComponent(typeof(Rigidbody))]
 	public class CharacterMove : MonoBehaviour
 	{
 		[HideInInspector] public Rigidbody rb;
+		[ContextMenuItem("Create default user controls", "CreateDefaultUserControls")]
 		public Transform head;
 
 		void Start()
@@ -30,7 +32,7 @@ namespace NonStandard {
 			public bool jumpAtObstacle;
 			public bool arrived;
 			public static bool GetClickedLocation(Camera camera, out Vector3 targetPosition) {
-				Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+				Ray ray = camera.ScreenPointToRay(UnityEngine.Input.mousePosition);
 				RaycastHit rh = new RaycastHit();
 				if (Physics.Raycast(ray, out rh)) {
 					targetPosition = rh.point;
@@ -81,7 +83,7 @@ namespace NonStandard {
 			[HideInInspector] public float turnClockwise;
 
 			[HideInInspector] public Vector3 moveDirection;
-			[HideInInspector] public Vector3 groundNormal; // TODO refactor int CharacterMove
+			[HideInInspector] public Vector3 groundNormal; // TODO refactor in CharacterMove
 			[HideInInspector] public Vector3 oppositionDirection;
 			[HideInInspector] public Vector3 lastVelocity;
 			[HideInInspector] public Vector3 lastOppositionDirection;
@@ -89,7 +91,7 @@ namespace NonStandard {
 			[Tooltip("Set this to enable click-to-move")]
 			public Transform orientationTransform;
 
-			Vector3 ConvertIntentionToRealDirection(Vector3 intention, Transform playerTransform) {
+			Vector3 ConvertIntentionToRealDirection(Vector3 intention, Transform playerTransform, out float speed) {
 				if (orientationTransform) {
 					Vector3 originalIntention = intention;
 					intention = orientationTransform.TransformDirection(intention);
@@ -102,7 +104,8 @@ namespace NonStandard {
 				} else {
 					intention = playerTransform.transform.TransformDirection(intention);
 				}
-				intention.Normalize();
+				speed = intention.magnitude;
+				intention /= speed;
 				return intention;
 			}
 			public Vector3 AccountForBlocks(Vector3 moveVelocity) {
@@ -120,13 +123,16 @@ namespace NonStandard {
 				Transform t = cm.transform;
 				Vector3 oldDirection = moveDirection;
 				moveDirection = new Vector3(strafeRightMovement, 0, moveForwardMovement);
+				float intendedSpeed = 1;
 				if (moveDirection != Vector3.zero) {
-					moveDirection = ConvertIntentionToRealDirection(moveDirection, t);
+					moveDirection = ConvertIntentionToRealDirection(moveDirection, t, out intendedSpeed);
+					if (intendedSpeed > 1) { intendedSpeed = 1; }
+					// else { Debug.Log(intendedSpeed); }
 				}
 				if (automaticMovement.enabled) {
 					if (moveDirection == Vector3.zero) {
 						if (!automaticMovement.arrived) {
-							moveDirection = automaticMovement.CalculateMoveDirection(t.position, speed, Vector3.up, ref automaticMovement.arrived);
+							moveDirection = automaticMovement.CalculateMoveDirection(t.position, speed * intendedSpeed, Vector3.up, ref automaticMovement.arrived);
 							if (automaticMovement.arrived) { cm.callbacks.arrived.Invoke(automaticMovement.targetPosition); }
 						}
 					} else {
@@ -136,7 +142,7 @@ namespace NonStandard {
 				if (moveDirection != Vector3.zero) {
 					moveVelocity = AccountForBlocks(moveDirection);
 					// apply the direction-adjusted movement to the velocity
-					moveVelocity *= speed;
+					moveVelocity *= (speed * intendedSpeed);
 				}
 				if(moveDirection != oldDirection) { cm.callbacks.moveDirectionChanged.Invoke(moveDirection); }
 				float gravity = cm.rb.velocity.y; // get current gravity
@@ -206,21 +212,18 @@ namespace NonStandard {
 			speed = 5,
 			maxStableAngle = 60,
 			lookForwardMoving = true,
-			automaticMovement = new AutoMove { jumpAtObstacle = true }
+			automaticMovement = new AutoMove { }
 		};
-
-		private void Update() {
-			if (Jump != lastJump) {
-				jump.PressJump = Jump;
-				lastJump = Jump;
-			}
-		}
 
 		public float GetJumpProgress() {
 			return move.isStableOnGround ? 1 : (1 - ((float)jump.jumpsSoFar / jump.maxJumps));
 		}
 
 		void FixedUpdate() {
+			if (Jump != lastJump) {
+				jump.PressJump = Jump;
+				lastJump = Jump;
+			}
 			move.FixedUpdate(this);
 			jump.FixedUpdate(this);
 			if (!move.isStableOnGround && !jump.impulseActive && move.groundNormal != Vector3.zero) {
@@ -275,7 +278,7 @@ namespace NonStandard {
 
 			[Tooltip("if false, double jumps won't 'restart' a jump, just add jump velocity")]
 			private bool jumpStartResetsVerticalMotion = true;
-			public int jumpsSoFar;// { get; protected set; }
+			[HideInInspector] public int jumpsSoFar;// { get; protected set; }
 			/// <returns>if this instance is trying to jump</returns>
 			public bool IsJumping { get { return inputHeld; } set { inputHeld = value; } }
 			/// <summary>pretends to hold the jump button for the specified duration</summary>
@@ -373,6 +376,44 @@ namespace NonStandard {
 			public UnityEvent collisionStopped;
 			[Tooltip("when auto-moving player reaches their goal, passes absolute location of the goal")]
 			public UnityEvent_Vector3 arrived;
+		}
+		public void CreateDefaultUserControls() {
+			GameObject userInput = new GameObject(name+" input");
+			Transform t = userInput.transform;
+			t.SetParent(transform);
+			t.localPosition = Vector3.zero;
+			CharacterCamera camera = GetComponentInChildren<CharacterCamera>();
+			if(camera == null) { camera = GetComponentInParent<CharacterCamera>(); }
+			UserInput mouseLook = userInput.AddComponent<UserInput>();
+			if(camera != null) {
+				mouseLook.axisBinds.Add(new AxBind(new Axis("Mouse X", 5), "mouselook X",
+					camera, "set_HorizontalRotateInput"));
+				mouseLook.axisBinds.Add(new AxBind(new Axis("Mouse Y", 5), "mouselook Y",
+					camera, "set_VerticalRotateInput"));
+			}
+			mouseLook.enabled = false;
+			UserInput userMoves = userInput.AddComponent<UserInput>();
+			KBind rightClick = new KBind(KCode.Mouse1, "use mouselook",
+				pressFunc: KBind.Func(mouseLook, "set_enabled", true),
+				releaseFunc: KBind.Func(mouseLook, "set_enabled", false));
+			rightClick.keyEvent.AddPress(camera, "SetMouseCursorLock", true);
+			rightClick.keyEvent.AddRelease(camera, "SetMouseCursorLock", false);
+			userMoves.keyBinds.Add(rightClick);
+			userMoves.keyBinds.Add(new KBind(KCode.PageUp, "zoom in",
+				pressFunc: KBind.Func(camera, "set_ZoomInput", -5f),
+				releaseFunc: KBind.Func(camera, "set_ZoomInput", 0f)));
+			userMoves.keyBinds.Add(new KBind(KCode.PageDown, "zoom out",
+				pressFunc: KBind.Func(camera, "set_ZoomInput", 5f),
+				releaseFunc: KBind.Func(camera, "set_ZoomInput", 0f)));
+			userMoves.keyBinds.Add(new KBind(KCode.Space, "jump",
+				pressFunc: KBind.Func(this, "set_Jump", 1f),
+				releaseFunc: KBind.Func(this, "set_Jump", 0f)));
+			userMoves.axisBinds.Add(new AxBind(new Axis("Horizontal"), "strafe right/left",
+				this, "set_StrafeRightMovement"));
+			userMoves.axisBinds.Add(new AxBind(new Axis("Vertical"), "move forward/backward",
+				this, "set_MoveForwardMovement"));
+			userMoves.axisBinds.Add(new AxBind(new Axis("Mouse ScrollWheel", -4), "zoom in/out",
+				camera, "AddToTargetDistance"));
 		}
 	}
 }

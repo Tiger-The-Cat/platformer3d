@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1185990136720438426}
   - component: {fileID: 1185990136720438427}
   - component: {fileID: 6195242797964227686}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Moving Obstacle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -106,3 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f61a98be8a2720b43bde0ca57ff26af5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveTime: 2.5
+  moveAmount: 0
+  moveSpeed: 5
+  direction: {x: 0, y: 0, z: 1}

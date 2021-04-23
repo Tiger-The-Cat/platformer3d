@@ -107,7 +107,8 @@ namespace Moback.UXP.AssetGeneration
 				cy = edgeOrigins[i].y * texture.height;
 				x = w * edgeDirections[i].x + cx;
 				y = h * edgeDirections[i].y + cy;
-				NS.Lines.DrawLine(texture, (int)cx, (int)cy, (int)x, (int)y, Color.red);
+                print("Sorry error NS is not usable in current context, so I commented it out");
+				//NS.Lines.DrawLine(texture, (int)cx, (int)cy, (int)x, (int)y, Color.red);
 			}
 			texture.Apply();
 		}

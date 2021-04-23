@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 
-namespace NonStandard
+namespace NonStandard.Character
 {
 	public class CharacterMoveAnimationCallbacks : MonoBehaviour
 	{
@@ -16,7 +13,7 @@ namespace NonStandard
 		{
 			if (character == null) { character = GetComponentInParent<CharacterMove>(); }
 			if (character == null) { character = GetComponent<CharacterMove>(); }
-			if (character == null) { Follow f = GetComponent<Follow>();
+			if (character == null) { Utility.Follow f = GetComponent<Utility.Follow>();
 				if (f) { character = f.whoToFollow.GetComponent<CharacterMove>(); }
 			}
 			if (character != null) {

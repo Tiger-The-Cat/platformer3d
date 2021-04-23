@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace NonStandard {
+namespace NonStandard.Utility {
 	public class PerfWarnOnSelection : MonoBehaviour {
 #if UNITY_EDITOR
 		public GameObject[] selectingSlowsRenderingInEditMode;
@@ -23,7 +21,7 @@ namespace NonStandard {
 		private void FixedUpdate() {
 			if (EditorApplication.isPlaying && !gaveWarningAboutPerformanceWhileSelected && (whichSelected = WhichSelected()) >= 0) {
 				Debug.LogWarning("UnityEditor Performance Warning: Selecting "+ selectingSlowsRenderingInEditMode [whichSelected].name +
-					" during play mode causes camera stutter, because graphics Update is synching to Unity Editor Inspector UI.");
+					" during play mode may cause camera stutter, because graphics Update is synching to Unity Editor Inspector UI.");
 				gaveWarningAboutPerformanceWhileSelected = true;
 			}
 		}

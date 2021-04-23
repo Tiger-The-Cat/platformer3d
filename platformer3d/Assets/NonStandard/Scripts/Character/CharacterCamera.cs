@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace NonStandard {
+namespace NonStandard.Character {
 	public class CharacterCamera : MonoBehaviour
 	{
 		[Tooltip("which transform to follow with the camera")]
@@ -9,7 +9,7 @@ namespace NonStandard {
 		public bool clipAgainstWalls = true;
 
 		/// <summary>how far the camera wants to be from the target</summary>
-		private float targetDistance = 10;
+		public float targetDistance = 10;
 		/// <summary>calculate how far to clip the camera in the Update, to keep LateUpdate as light as possible
 		private float distanceBecauseOfObstacle;
 		/// <summary>how the camera should be rotated, calculated in Update, to keep LateUpdate as light as possible</summary>
@@ -21,11 +21,16 @@ namespace NonStandard {
 		private float pitch, yaw;
 
 		public float maxVerticalAngle = 100, minVerticalAngle = -100;
+		public Vector2 inputMultiplier = Vector2.one;
 
 		/// publicly accessible variables that can be modified by external scripts or UI
 		[HideInInspector] public float horizontalRotateInput, verticalRotateInput, zoomInput;
-		public float HorizontalRotateInput { get { return horizontalRotateInput; } set { horizontalRotateInput = value; } }
-		public float VerticalRotateInput { get { return verticalRotateInput; } set { verticalRotateInput = value; } }
+		public float HorizontalRotateInput { get { return horizontalRotateInput; }
+			set { horizontalRotateInput = inputMultiplier.x == 1 ? value : inputMultiplier.x * value; }
+		}
+		public float VerticalRotateInput { get { return verticalRotateInput; } 
+			set { verticalRotateInput = inputMultiplier.y == 1 ? value : inputMultiplier.y * value; }
+		}
 		public float ZoomInput { get { return zoomInput; } set { zoomInput = value; } }
 		public void AddToTargetDistance(float value) { targetDistance += value; }
 
@@ -34,15 +39,23 @@ namespace NonStandard {
 		void Reset() {
 			if (target == null) {
 				CharacterMove body = null;
-				if (body == null) { body = t.GetComponentInParent<CharacterMove>(); }
+				if (body == null) { body = transform.GetComponentInParent<CharacterMove>(); }
 				if (body == null) { body = FindObjectOfType<CharacterMove>(); }
 				if (body != null) { target = body.head; }
 			}
 		}
 	#endif
-		private void Awake() { t = transform; }
 
-		private void Start() {
+		public void SetMouseCursorLock(bool a_lock) {
+			Cursor.lockState = a_lock ? CursorLockMode.Locked : CursorLockMode.None;
+			Cursor.visible = !a_lock;
+		}
+		public void LockCursor() { SetMouseCursorLock(true); }
+		public void UnlockCursor() { SetMouseCursorLock(false); }
+
+		public void Awake() { t = transform; }
+
+		public void Start() {
 			if(target != null) {
 				Vector3 delta = t.position - target.position;
 				targetDistance = delta.magnitude;
@@ -55,8 +68,11 @@ namespace NonStandard {
 			if (Vector3.Dot(Vector3.up, t.forward) > 0) { pitch *= -1; }
 		}
 
-		void Update() {
-			float rotH = horizontalRotateInput * Time.deltaTime, rotV = verticalRotateInput * Time.deltaTime, zoom = zoomInput * Time.deltaTime;
+		public void Update() {
+			const float anglePerSecondMultiplier = 100;
+			float rotH = horizontalRotateInput * anglePerSecondMultiplier * Time.unscaledDeltaTime,
+				rotV = verticalRotateInput * anglePerSecondMultiplier * Time.unscaledDeltaTime,
+				zoom = zoomInput * Time.unscaledDeltaTime;
 			targetDistance += zoom;
 			if (rotH != 0 || rotV != 0)
 			{
@@ -85,7 +101,7 @@ namespace NonStandard {
 			}
 		}
 
-		private void LateUpdate() {
+		public void LateUpdate() {
 			t.rotation = targetRotation;
 			if(target != null) {
 				t.position = target.position - (targetRotation * Vector3.forward) * distanceBecauseOfObstacle;
